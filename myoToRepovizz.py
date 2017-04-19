@@ -28,22 +28,31 @@ def main(argv):
         for files in only_files:
             #this populate myData dictionary with all files on the folder with their type
             filetype = str(files).split(".")
-            #print filetype[1]
             if (filetype[1] != "DS_Store") and (filetype[1] != "xml"):
                 myResult = getType(files)
                 myData[myResult[0]].append(myResult[1])
 
 for row in myData:
-    newGenericNode = xml.createGenericNode(myXml, genericNode, "Data", row, "ROOT0_Mult0_MYOD0")
+    if (row != 'Video') and (row != 'Audio'):
+        newGenericNode = xml.createGenericNode(myXml, genericNode, "Data", row, "ROOT0_Mult0_MYOD0")
         for child_key in myData[row]:
+            #file = fn + "/"+ child_key
+            #with open(file) as f:
+            #    print f.read().splitlines()
             name = str(child_key).split(".")
             for intype, format in fileType.iteritems():
                 for elements in format:
                     if elements == row:
                         typeOfNode = intype
-            child = xml.addChildNode(myXml, newGenericNode, typeOfNode, name[0], name[0][4:-1], name[1], 1.0, -1.0)
-#print xml.printXml(myXml)
-outputFile = xml.fileToSave(myXml)
+            if(name[1] == 'wav'):
+                audioInfo = getAudioInfo(fn + "/" + child_key)
+                audioChild = xml.addAudioNode(myXml, genericNode, typeOfNode, name[0]+'.'+name[1], '0', name[1], '2', audioInfo[0]*2, audioInfo[1])
+            elif(name[1] == 'mp4'):
+                videoChild = xml.addVideoNode(myXml, genericNode, typeOfNode, name[0] + '.' + name[1], '0', name[1])
+            else:
+                child = xml.addChildNode(myXml, newGenericNode, typeOfNode, name[0]+'.'+name[1], name[0], name[1], '4', '-4')
+print xml.printXml(myXml)
+    outputFile = xml.fileToSave(myXml)
     
     # Write the updated XML structure
     file_handle = open(fn + '/' + nameFile + ".xml", "wb")
@@ -51,6 +60,20 @@ outputFile = xml.fileToSave(myXml)
     file_handle.close()
     zippedFile = make_zipfile(fn)
     uploadFileToRepovizz(zippedFile)
+
+def getAudioInfo(audioFile):
+    import wave
+    import contextlib
+    fname = audioFile
+    with contextlib.closing(wave.open(fname, 'r')) as f:
+        frames = f.getnframes()
+        rate = f.getframerate()
+        duration = frames / float(rate)
+        result = frames, rate, duration
+        print("Audio info: ")
+        print( "frames: " + str(frames) + " rate: " + str(rate) + " duration: " + str(duration))
+    return result
+
 
 # Zips an entire directory using zipfile -----------------------------------------
 def make_zipfile(_path):
