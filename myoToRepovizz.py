@@ -10,7 +10,7 @@ def main(argv):
     myLocalPath = os.path.abspath(sys.argv[0])
     head, tail = os.path.split(os.path.split(myLocalPath)[0])
     interPath = (head + "/" + tail + "/")
-    
+
     myXml = xml()
     myData = defaultdict(list)
     typeOfNode = 'Signal'
@@ -21,7 +21,7 @@ def main(argv):
         'Video': ('Video', 'video'),
         'File': ('Other', 'pd')
     }
-    
+
     if os.path.exists(fn):
         only_files = [f for f in listdir(fn) if isfile(join(fn, f))]
         genericNode = xml.createGenericNode(myXml, myXml.getRoot(), 'MultimodalRecording', 'MYO_lifting', 'ROOT0_Mult0')
@@ -32,9 +32,9 @@ def main(argv):
                 myResult = getType(files)
                 myData[myResult[0]].append(myResult[1])
 
-for row in myData:
-    if (row != 'Video') and (row != 'Audio'):
-        newGenericNode = xml.createGenericNode(myXml, genericNode, "Data", row, "ROOT0_Mult0_MYOD0")
+    for row in myData:
+        if (row != 'Video') and (row != 'Audio'):
+            newGenericNode = xml.createGenericNode(myXml, genericNode, "Data", row, "ROOT0_Mult0_MYOD0")
         for child_key in myData[row]:
             #file = fn + "/"+ child_key
             #with open(file) as f:
@@ -51,9 +51,9 @@ for row in myData:
                 videoChild = xml.addVideoNode(myXml, genericNode, typeOfNode, name[0] + '.' + name[1], '0', name[1])
             else:
                 child = xml.addChildNode(myXml, newGenericNode, typeOfNode, name[0]+'.'+name[1], name[0], name[1], '4', '-4')
-print xml.printXml(myXml)
+    print xml.printXml(myXml)
     outputFile = xml.fileToSave(myXml)
-    
+
     # Write the updated XML structure
     file_handle = open(fn + '/' + nameFile + ".xml", "wb")
     file_handle.write(outputFile)
@@ -81,7 +81,7 @@ def make_zipfile(_path):
     if os.path.isdir(_path):
         inName = os.path.basename(_path) + '.zip'
         #head, tail = os.path.split(os.path.split(_path)[0])
-        
+
         print "saving: " + inName
         def zipdir(_path, zip_handle):
             for root, dirs, files in os.walk(_path):
@@ -97,7 +97,7 @@ def uploadFileToRepovizz(file):
     print 'uploading data into repoVizz...'
     fname = file
     folderName = (fname).split(".")
-    
+
     toload = {
         'folder': 'testing_uploading',
         'name': folderName[0],
@@ -118,24 +118,24 @@ def uploadFileToRepovizz(file):
     result = str(r2).split(" ")
     result = result[1][1:-2]
 
-# If the response body isn't empty
-if result == "200":
-    # Get a description of the datapack
-    r3 = requests.get(
-                      "https://repovizz.upf.edu/repo/api/datapacks/" + str(r2.json()['datapacks'][0]['id']) + "/brief")
+    # If the response body isn't empty
+    if result == "200":
+        # Get a description of the datapack
+        r3 = requests.get(
+            "https://repovizz.upf.edu/repo/api/datapacks/" + str(r2.json()['datapacks'][0]['id']) + "/brief")
         # If the datapack was uploaded succesfully
         if (r3.json()['duration'] != 0):
             # Get the datapack ID and construct a working link to the datapack
             response = 'https://repovizz.upf.edu/repo/Vizz/' + str(r2.json()['datapacks'][0]['id'])
         elif r3 == "<Response [404]>":
             response = "Datapack not found"
-                      else:
+        else:
             response = 'ERROR'
-                      print response
+        print response
 
-elif result == "400":
-    print "Invalid datapack ID supplied"
-    
+    elif result == "400":
+        print "Invalid datapack ID supplied"
+
     elif result == "404":
         print "Datapack not found"
 
@@ -166,4 +166,4 @@ def getType(inFile):
     return result
 
 if __name__ == "__main__":
-    main(sys.argv)
+   main(sys.argv)
