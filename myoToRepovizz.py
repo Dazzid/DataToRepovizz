@@ -1,3 +1,7 @@
+#David Dalmazzo
+#MTG UPF
+#April 2017
+
 import sys
 import os
 from xmlCreator import xml
@@ -50,8 +54,8 @@ def main(argv):
             elif(name[1] == 'mp4'):
                 videoChild = xml.addVideoNode(myXml, genericNode, typeOfNode, name[0] + '.' + name[1], '0', name[1])
             else:
-                child = xml.addChildNode(myXml, newGenericNode, typeOfNode, name[0]+'.'+name[1], name[0], name[1], '4', '-4')
-    print xml.printXml(myXml)
+                child = xml.addChildNode(myXml, newGenericNode, typeOfNode, name[0]+'.'+name[1], name[0], name[1], '10', '-10')
+    #print xml.printXml(myXml)
     outputFile = xml.fileToSave(myXml)
 
     # Write the updated XML structure
@@ -91,7 +95,7 @@ def make_zipfile(_path):
             zipdir(_path, z)
     return inName
 
-#upload into repovizz all the file -----------------------------------------------
+# upload into repovizz all the file -----------------------------------------------
 def uploadFileToRepovizz(file):
     import requests
     print 'uploading data into repoVizz...'
@@ -139,7 +143,6 @@ def uploadFileToRepovizz(file):
     elif result == "404":
         print "Datapack not found"
 
-#------------------------------------------------------------------------------------
 def getType(inFile):
     dataType = {
         'MYO': ('emg', 'accel', 'gyro', 'orientation'),
