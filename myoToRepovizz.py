@@ -66,7 +66,7 @@ def main(argv):
     file_handle = open(fn + '/' + nameFile + ".xml", "wb")
     file_handle.write(outputFile)
     file_handle.close()
-    zippedFile = make_zipfile(fn)
+    zippedFile = make_zipfile(fn, interPath)
     uploadFileToRepovizz(zippedFile)
 
 def getAudioInfo(audioFile):
@@ -84,19 +84,18 @@ def getAudioInfo(audioFile):
 
 
 # Zips an entire directory using zipfile -----------------------------------------
-def make_zipfile(_path):
+def make_zipfile(_path, _destination):
     import zipfile
     if os.path.isdir(_path):
-        inName = os.path.basename(_path) + '.zip'
+        inName = os.path.join(_destination, os.path.basename(_path) + '.zip')
         #head, tail = os.path.split(os.path.split(_path)[0])
         print "saving: " + inName
         def zipdir(_path, zip_handle):
             for root, dirs, files in os.walk(_path):
                 for file in files:
                     zip_handle.write(os.path.join(root, file), file)
-        with zipfile.ZipFile(inName, 'w',compression=zipfile.ZIP_DEFLATED, allowZip64=True) as z:
+        with zipfile.ZipFile(inName, 'w', compression=zipfile.ZIP_DEFLATED, allowZip64=True) as z:
             zipdir(_path, z)
-    print "zip file created"
     return inName
 
 # upload into repovizz all the file -----------------------------------------------
