@@ -18,6 +18,7 @@ def main(argv):
     myLocalPath = os.path.abspath(sys.argv[0])
     head, tail = os.path.split(os.path.split(myLocalPath)[0])
     interPath = (head + "/" + tail + "/")
+    print interPath
 
     myXml = xml()
     myData = defaultdict(list)
@@ -102,34 +103,37 @@ def make_zipfile(_path, _destination):
 def uploadFileToRepovizz(file):
     import requests
     print 'uploading data into repoVizz...'
-    fname = file
-    folderName = (fname).split(".")
+
+    folderName = (file).split(".")
+    fileName = (folderName[0]).split("/")
+    num = len(fileName)-1
+    name_rvizz = fileName[num]
 
     toload = {
         'folder': 'testing_uploading',
-        'name': folderName[0],
+        'name': name_rvizz,
         'desc': 'testing, sending data from python to repoVizz',
         'user': 'Dazzid',
         'api_key': '9fc3d7152ba9336a670e36d0ed79bc43',
         'computeaudiodesc': '0',
         'computemocapdesc': '0',
         'keywords': 'myo',
-        'file': open(fname, 'rb')}
+        'file': open(file, 'rb')}
 
     # Open an HTTP session
     s = requests.Session()
-    # Upload the datapackh
-    r = requests.post("https://repovizz.upf.edu/repo/api/datapacks/upload", files=toload, stream=True)
-    # Unfortunately, the POST request doesn't return the upload link, so we have to search for it ourselves
-    r2 = s.get("https://repovizz.upf.edu/repo/api/datapacks/search", params={'q': folderName[0]})
+    # Upload the zipped file
+    requests.post("https://repovizz.upf.edu/repo/api/datapacks/upload", files=toload, stream=True)
+
+    # find the folder on the repository
+    r2 = s.get("https://repovizz.upf.edu/repo/api/datapacks/search", params={'q': name_rvizz})
     result = str(r2).split(" ")
     result = result[1][1:-2]
 
     # If the response body isn't empty
     if result == "200":
         # Get a description of the datapack
-        r3 = requests.get(
-            "https://repovizz.upf.edu/repo/api/datapacks/" + str(r2.json()['datapacks'][0]['id']) + "/brief")
+        r3 = requests.get("https://repovizz.upf.edu/repo/api/datapacks/" + str(r2.json()['datapacks'][0]['id']) + "/brief")
         # If the datapack was uploaded succesfully
         if (r3.json()['duration'] != 0):
             # Get the datapack ID and construct a working link to the datapack
