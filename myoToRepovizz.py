@@ -1,3 +1,4 @@
+#!/Users/David/anaconda2/bin/python
 #David Dalmazzo
 #MTG UPF
 #April 2017
@@ -10,6 +11,9 @@ from os.path import isfile, join
 from collections import defaultdict
 
 def main(argv):
+    if (len(argv) <= 1):
+        print "-----> ERROR: you need to specify the folder path to upload"
+        quit()
     fn = sys.argv[1]
     myLocalPath = os.path.abspath(sys.argv[0])
     head, tail = os.path.split(os.path.split(myLocalPath)[0])
@@ -85,7 +89,6 @@ def make_zipfile(_path):
     if os.path.isdir(_path):
         inName = os.path.basename(_path) + '.zip'
         #head, tail = os.path.split(os.path.split(_path)[0])
-
         print "saving: " + inName
         def zipdir(_path, zip_handle):
             for root, dirs, files in os.walk(_path):
@@ -93,6 +96,7 @@ def make_zipfile(_path):
                     zip_handle.write(os.path.join(root, file), file)
         with zipfile.ZipFile(inName, 'w',compression=zipfile.ZIP_DEFLATED, allowZip64=True) as z:
             zipdir(_path, z)
+    print "zip file created"
     return inName
 
 # upload into repovizz all the file -----------------------------------------------
@@ -145,7 +149,7 @@ def uploadFileToRepovizz(file):
 
 def getType(inFile):
     dataType = {
-        'MYO': ('emg', 'accel', 'gyro', 'orientation'),
+        'MYO': ('emg', 'accel', 'gyro', 'orientation')  ,
         'AUDIO': ('wav', 'aiff', 'mp3', 'ogg'),
         'VIDEO': ('mp4', 'mov'),
         'EEG': 'null', #to be completed
