@@ -9,6 +9,7 @@ from xmlCreator import xml
 from os import listdir
 from os.path import isfile, join
 from collections import defaultdict
+import numpy as np
 
 def main(argv):
     if (len(argv) <= 1):
@@ -45,9 +46,15 @@ def main(argv):
         if (row != 'Video') and (row != 'Audio'):
             newGenericNode = xml.createGenericNode(myXml, genericNode, "Data", row, "ROOT0_Mult0_MYOD0")
         for child_key in myData[row]:
-            #file = fn + "/"+ child_key
-            #with open(file) as f:
-            #    print f.read().splitlines()
+            typeOfFile = child_key.split(".")
+            #check max and min values
+            if(typeOfFile[1] == 'csv'):
+                file = fn + "/"+ child_key
+                with open(file) as f:
+                    data = f.read().splitlines()
+                    values = data[1].split(",")
+                    min_max = minmax(values)
+
             name = str(child_key).split(".")
             for intype, format in fileType.iteritems():
                 for elements in format:
@@ -59,7 +66,7 @@ def main(argv):
             elif(name[1] == 'mp4'):
                 videoChild = xml.addVideoNode(myXml, genericNode, typeOfNode, name[0] + '.' + name[1], '0', name[1])
             else:
-                child = xml.addChildNode(myXml, newGenericNode, typeOfNode, name[0]+'.'+name[1], name[0], name[1], '10', '-10')
+                child = xml.addChildNode(myXml, newGenericNode, typeOfNode, name[0]+'.'+name[1], name[0], name[1], min_max[1], min_max[0])
     #print xml.printXml(myXml)
     outputFile = xml.fileToSave(myXml)
 
@@ -69,6 +76,17 @@ def main(argv):
     file_handle.close()
     zippedFile = make_zipfile(fn, interPath)
     uploadFileToRepovizz(zippedFile)
+
+def minmax(x):
+    # this function fails if the list length is 0
+    minimum = maximum = x[0]
+    for i in x[1:]:
+        if i < minimum:
+            if(i != ''):
+                minimum = i
+        else:
+            if i > maximum: maximum = i
+    return (minimum,maximum)
 
 def getAudioInfo(audioFile):
     import wave
